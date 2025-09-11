@@ -1,0 +1,90 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-test:
+    name: Go ${{ matrix.go-version }} unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: ["1.23.x", "1.24.x", "1.25.x"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      - run: make test
+      - run: make test-race
+
+  integration-test:
+    name: Go ${{ matrix.go-version }} integration tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: ["1.23.x", "1.24.x", "1.25.x"]
+    services:
+      apicurio:
+        image: apicurio/apicurio-registry:latest-release@sha256:5e1c552a76afd1ba23dc1368a867dcd6e9f49ef26eafb15c1e2b0be40c31b021
+        ports:
+          - 8080:8080
+        options: >-
+          --health-cmd "curl -f http://localhost:8080/health/ready || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      - run: make test-integration
+
+  golangci:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.4.0
+
+  precommit:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    env:
+      # These hooks are run as dedicated jobs above instead.
+      SKIP: "test,golangci-lint"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - uses: actions/setup-python@v3
+
+      - name: set PYVERSION
+        run: echo "PYVERSION=$(python --version | tr ' ' '-')" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          # Changes to pre-commit-config.yaml may require the installation of
+          # new binaries/scripts. When a cache hit occurs, changes to the cache
+          # aren't persisted at the end of the run, so making the key dependent
+          # on the configuration file ensures we always persist a complete cache.
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}@${{ env.PYVERSION }}
+
+      - run: pip install pre-commit
+      - run: pre-commit run --all --color=always --show-diff-on-failure
