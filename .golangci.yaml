@@ -1,0 +1,64 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - depguard
+    - err113
+    - exhaustruct
+    - nlreturn
+    - paralleltest
+    - testpackage
+    - wrapcheck
+    - wsl
+
+    # Assess re-enabling of these after fixing their findings:
+    - bodyclose
+    - cyclop
+    - forbidigo
+    - funcorder
+    - funlen
+    - gochecknoglobals
+    - gocritic
+    - godot
+    - gosec
+    - ireturn
+    - lll
+    - mnd
+    - noinlineerr
+    - nolintlint
+    - perfsprint
+    - revive
+    - testifylint
+    - usestdlibvars
+    - wsl_v5
+
+  settings:
+    varnamelen:
+      max-distance: 15
+      ignore-names:
+        - tt
+      ignore-decls:
+        - wg sync.WaitGroup
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
