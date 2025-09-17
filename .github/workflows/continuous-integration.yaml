@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Setup Go ${{ matrix.go-version }}
-        uses: actions/setup-go@19bb51245e9c80abacb2e91cc42b33fa478b8639 # v4
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
         with:
           go-version: ${{ matrix.go-version }}
       - run: make test
@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Setup Go ${{ matrix.go-version }}
-        uses: actions/setup-go@19bb51245e9c80abacb2e91cc42b33fa478b8639 # v4
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
         with:
           go-version: ${{ matrix.go-version }}
       - run: make test-integration
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-      - uses: actions/setup-go@19bb51245e9c80abacb2e91cc42b33fa478b8639 # v4
+      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
         with:
           go-version: stable
       - name: golangci-lint
@@ -70,7 +70,7 @@ jobs:
       SKIP: "test,golangci-lint"
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-      - uses: actions/setup-go@19bb51245e9c80abacb2e91cc42b33fa478b8639 # v4
+      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
         with:
           go-version: stable
       - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6
