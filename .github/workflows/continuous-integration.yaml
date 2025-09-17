@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ["1.23.x", "1.24.x", "1.25.x"]
+        go-version: ["1.24.x", "1.25.x"]
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Setup Go ${{ matrix.go-version }}
@@ -33,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ["1.23.x", "1.24.x", "1.25.x"]
+        go-version: ["1.24.x", "1.25.x"]
     services:
       apicurio:
         image: apicurio/apicurio-registry:latest-release@sha256:5e1c552a76afd1ba23dc1368a867dcd6e9f49ef26eafb15c1e2b0be40c31b021
