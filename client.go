@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hamba/avro/v2"
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/sethvargo/go-retry"
 )
@@ -49,6 +50,11 @@ type SearchResults struct {
 // VersionMetadata represents version metadata for an artifact.
 type VersionMetadata struct {
 	GlobalID uint32 `json:"globalId"`
+}
+
+// VersionSearchResults represents the response from listing artifact versions.
+type VersionSearchResults struct {
+	Versions []VersionMetadata `json:"versions"`
 }
 
 // RegistrationResponse represents the response from schema registration.
@@ -446,7 +452,10 @@ func (c *ApicurioClient) CheckArtifactExists(ctx context.Context, groupID, artif
 	return resp.StatusCode == http.StatusOK, nil
 }
 
-// FindArtifactByContent finds artifact by searching registry with schema content.
+// FindArtifactByContent finds an artifact by searching the registry with schema content.
+// This method identifies which artifact contains a schema matching the provided content,
+// but does not guarantee which version of that artifact. Use FindExactSchemaVersionByContent
+// to get the specific version (global ID) that matches the content exactly.
 func (c *ApicurioClient) FindArtifactByContent(ctx context.Context, schemaContent string, groupID *string) (string, string, error) {
 	url := "/apis/registry/v3/search/artifacts"
 
@@ -501,6 +510,68 @@ func (c *ApicurioClient) FindArtifactByContent(ctx context.Context, schemaConten
 	}
 
 	return groupIDResult, artifactID, nil
+}
+
+// FindExactSchemaVersionByContent finds the exact schema version (global ID) that matches
+// the provided schema content within a specific artifact. This differs from FindArtifactByContent
+// which only identifies the artifact but not the specific version. This method prevents race
+// conditions by ensuring we get the precise schema version that corresponds to the content,
+// rather than just the latest version of the artifact.
+func (c *ApicurioClient) FindExactSchemaVersionByContent(ctx context.Context, groupID, artifactID, schemaContent string) (uint32, error) {
+	// Get all versions of the artifact
+	url := fmt.Sprintf("/apis/registry/v3/groups/%s/artifacts/%s/versions", groupID, artifactID)
+	resp, err := c.makeRequest(ctx, "GET", url, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close() //nolint:errcheck
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return 0, fmt.Errorf("HTTP error %d: %s", resp.StatusCode, string(body))
+	}
+
+	var versions VersionSearchResults
+	if err := json.NewDecoder(resp.Body).Decode(&versions); err != nil {
+		return 0, fmt.Errorf("failed to decode versions: %w", err)
+	}
+
+	// Find the version with matching content
+	for _, version := range versions.Versions {
+		if version.GlobalID == 0 {
+			continue
+		}
+
+		// Get the schema content for this version
+		versionSchema, err := c.GetSchemaByGlobalID(ctx, version.GlobalID)
+		if err != nil {
+			continue // Skip this version if we can't get the schema
+		}
+
+		// Convert to JSON string for comparison
+		versionJSON, err := json.Marshal(versionSchema)
+		if err != nil {
+			continue
+		}
+
+		// Parse both schemas to normalize them for comparison
+		providedSchema, err := avro.Parse(schemaContent)
+		if err != nil {
+			continue
+		}
+
+		versionAvroSchema, err := avro.Parse(string(versionJSON))
+		if err != nil {
+			continue
+		}
+
+		// Compare canonical representations
+		if providedSchema.String() == versionAvroSchema.String() {
+			return version.GlobalID, nil
+		}
+	}
+
+	return 0, fmt.Errorf("no schema version found with matching content for %s/%s", groupID, artifactID)
 }
 
 // ClearCache clears all cached schemas and failed lookups.

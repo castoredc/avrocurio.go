@@ -37,13 +37,13 @@ func (s *AvroSerializer) Serialize(ctx context.Context, obj interface{}, schema 
 		return nil, fmt.Errorf("please register the schema manually or specify a schema_id: %w", ErrSchemaNotMatched)
 	}
 
-	// Get schema ID and serialize
-	foundSchemaID, _, err := s.client.GetLatestSchema(ctx, groupID, artifactID)
+	// Find the exact schema ID that matches our content
+	schemaID, err := s.client.FindExactSchemaVersionByContent(ctx, groupID, artifactID, schemaContent)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get latest schema: %w", err)
+		return nil, fmt.Errorf("failed to find exact schema ID by content: %w", err)
 	}
 
-	return s.serializeWithSchemaID(ctx, obj, foundSchemaID)
+	return s.serializeWithSchemaID(ctx, obj, schemaID)
 }
 
 // serializeWithSchemaID performs core serialization logic using a specific schema ID.
