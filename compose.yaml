@@ -1,6 +1,6 @@
 services:
   apicurio-registry:
-    image: apicurio/apicurio-registry:latest-release@sha256:5e1c552a76afd1ba23dc1368a867dcd6e9f49ef26eafb15c1e2b0be40c31b021
+    image: apicurio/apicurio-registry:latest-release@sha256:9464d0de6394e543efeea829aee07bff52c5cccee7bba362cf96e02de48da453
     ports:
       - "127.0.0.1:8080:8080"
   apicurio-registry-ui:
