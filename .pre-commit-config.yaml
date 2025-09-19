@@ -23,7 +23,7 @@ repos:
         name: go fmt
         language: system
         types: [go]
-        entry: make
+        entry: just
         args: ["fmt"]
         pass_filenames: false
 
@@ -31,7 +31,7 @@ repos:
         name: go test
         language: system
         types: [go]
-        entry: make
+        entry: just
         args: ["test-short"]
         pass_filenames: false
 
@@ -39,7 +39,7 @@ repos:
         name: go mod tidy
         language: system
         types: [go]
-        entry: make
+        entry: just
         args: ["tidy"]
         pass_filenames: false
 

@@ -24,8 +24,9 @@ jobs:
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
         with:
           go-version: ${{ matrix.go-version }}
-      - run: make test
-      - run: make test-race
+      - run: sudo snap install --classic just
+      - run: just test
+      - run: just test-race
 
   integration-test:
     name: Go ${{ matrix.go-version }} integration tests
@@ -47,7 +48,8 @@ jobs:
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
         with:
           go-version: ${{ matrix.go-version }}
-      - run: make test-integration
+      - run: sudo snap install --classic just
+      - run: just test-integration
 
   golangci:
     name: golangci-lint
@@ -86,5 +88,6 @@ jobs:
           # on the configuration file ensures we always persist a complete cache.
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}@${{ env.PYVERSION }}
 
-      - run: pip install pre-commit
+      - run: sudo snap install --classic just
+      - run: pipx install pre-commit
       - run: pre-commit run --all --color=always --show-diff-on-failure

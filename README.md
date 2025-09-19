@@ -48,20 +48,22 @@ docker compose up
 
 Port 8080 is assumed by default, but you can set `APICURIO_URL` to point to a different instance.
 
+[Just] is used for task automation and must be installed as well.
+
 ### Running Tests
 
 ```bash
 # Run unit tests
-make test
+just test
 
 # Run tests with race detection
-make test-race
+just test-race
 
 # Run tests with coverage
-make test-cover
+just test-cover
 
 # Run integration tests (requires running Apicurio Registry)
-make test-integration
+just test-integration
 ```
 
 ## License
@@ -76,6 +78,7 @@ Please review the [LICENSE] file for the full text of the license.
 [BSD-2-Clause Plus Patent License]: https://spdx.org/licenses/BSD-2-Clause-Patent.html
 [Confluent Schema Registry framing]: https://docs.confluent.io/platform/current/schema-registry/fundamentals/serdes-develop/index.html#wire-format
 [ExampleAvroSerializer]: example_test.go
+[Just]: https://github.com/casey/just
 [LICENSE]: LICENSE
 [Python AvroCurio library]: https://github.com/castoredc/avrocurio
 [docker-compose]: https://docs.docker.com/compose/

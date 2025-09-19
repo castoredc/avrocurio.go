@@ -10,34 +10,34 @@ AvroCurio is a Go library for Apache Avro serialization/deserialization using Co
 
 ```bash
 # Build the library
-make build
+just build
 
 # Run unit tests
-make test
+just test
 
 # Run tests with race detection
-make test-race
+just test-race
 
 # Run tests with coverage
-make test-cover
+just test-cover
 
 # Run integration tests (requires Docker)
-make test-integration
+just test-integration
 
 # Run linting
-make lint
+just lint
 
 # Format code
-make fmt
+just fmt
 
 # Full development workflow (deps, format, lint, test)
-make dev
+just dev
 
 # Start Apicurio Registry for testing
-make docker-up
+just docker-up
 
 # Stop Apicurio Registry
-make docker-down
+just docker-down
 ```
 
 ## Architecture
