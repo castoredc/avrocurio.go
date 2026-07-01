@@ -1,31 +1,35 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    "config:best-practices",
-    "schedule:monthly",
-    ":semanticCommitsDisabled",
+    'config:best-practices',
+    'schedule:monthly',
+    ':semanticCommitsDisabled',
   ],
-  // Code review will still block renovate from merging automatically,
-  // this just saves reviewers time by immediately auto-merging on approval.
   automerge: true,
   dependencyDashboard: true,
-  labels: ["dependencies"],
+  labels: [
+    'dependencies',
+  ],
   lockFileMaintenance: {
     enabled: true,
   },
   packageRules: [
     {
-      matchCategories: ["go"],
-      minimumReleaseAge: "7 days",
+      matchCategories: [
+        'go',
+      ],
+      minimumReleaseAge: '7 days',
     },
   ],
   ignorePaths: [],
   customManagers: [
     {
-      customType: "regex",
-      fileMatch: ["^\\.github/workflows/"],
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows//',
+      ],
       matchStrings: [
-        "version: (?<currentValue>v[\\d.]+) # renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)",
+        'version: (?<currentValue>v[\\d.]+) # renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)',
       ],
     },
   ],
