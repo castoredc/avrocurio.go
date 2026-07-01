@@ -23,7 +23,7 @@
   customManagers: [
     {
       customType: "regex",
-      fileMatch: ["^\\.github/workflows/"],
+      managerFilePatterns: ["^\\.github/workflows/"],
       matchStrings: [
         "version: (?<currentValue>v[\\d.]+) # renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)",
       ],
