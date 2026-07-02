@@ -10,6 +10,7 @@ linters:
     - testpackage
     - wrapcheck
     - wsl
+    - gomodguard # Replaced by gomodguard_v2
 
     # Assess re-enabling of these after fixing their findings:
     - bodyclose

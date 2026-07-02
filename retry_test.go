@@ -66,11 +66,11 @@ func TestRetryMechanism(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var requestCount int64
+			var requestCount atomic.Int64
 
 			// Create test server that returns different status codes
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				count := atomic.AddInt64(&requestCount, 1) - 1
+				count := requestCount.Add(1) - 1
 				if int(count) < len(tt.statusCodes) {
 					w.WriteHeader(tt.statusCodes[count])
 					if tt.statusCodes[count] == 200 {
@@ -98,7 +98,7 @@ func TestRetryMechanism(t *testing.T) {
 			ctx := context.Background()
 			resp, err := client.makeRequest(ctx, "GET", "/test", nil)
 
-			actualRetries := int(atomic.LoadInt64(&requestCount)) - 1
+			actualRetries := int(requestCount.Load()) - 1
 
 			if tt.expectSuccess {
 				assert.NoError(t, err)

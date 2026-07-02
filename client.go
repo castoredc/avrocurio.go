@@ -30,7 +30,7 @@ type CachedError struct {
 type ApicurioClient struct {
 	config      *ApicurioConfig
 	httpClient  *http.Client
-	schemaCache *ttlcache.Cache[uint32, map[string]interface{}]
+	schemaCache *ttlcache.Cache[uint32, map[string]any]
 	failedCache *ttlcache.Cache[uint32, *CachedError]
 }
 
@@ -78,7 +78,7 @@ func NewApicurioClient(config *ApicurioConfig) (*ApicurioClient, error) {
 
 	if config.SchemaCacheSize > 0 {
 		client.schemaCache = ttlcache.New(
-			ttlcache.WithCapacity[uint32, map[string]interface{}](uint64(config.SchemaCacheSize)),
+			ttlcache.WithCapacity[uint32, map[string]any](uint64(config.SchemaCacheSize)),
 		)
 		go client.schemaCache.Start()
 	}
@@ -232,7 +232,7 @@ func (c *ApicurioClient) shouldRetryStatusCode(statusCode int) bool {
 }
 
 // GetSchemaByGlobalID fetches schema by its global ID with caching.
-func (c *ApicurioClient) GetSchemaByGlobalID(ctx context.Context, globalID uint32) (map[string]interface{}, error) {
+func (c *ApicurioClient) GetSchemaByGlobalID(ctx context.Context, globalID uint32) (map[string]any, error) {
 	// Check cache first
 	if c.schemaCache != nil {
 		if item := c.schemaCache.Get(globalID); item != nil {
@@ -267,7 +267,7 @@ func (c *ApicurioClient) GetSchemaByGlobalID(ctx context.Context, globalID uint3
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var schema map[string]interface{}
+	var schema map[string]any
 	if err := json.Unmarshal(body, &schema); err != nil {
 		return nil, fmt.Errorf("invalid JSON schema content: %w", err)
 	}
@@ -281,7 +281,7 @@ func (c *ApicurioClient) GetSchemaByGlobalID(ctx context.Context, globalID uint3
 }
 
 // GetLatestSchema gets the latest version of a schema by group and artifact ID.
-func (c *ApicurioClient) GetLatestSchema(ctx context.Context, groupID, artifactID string) (uint32, map[string]interface{}, error) {
+func (c *ApicurioClient) GetLatestSchema(ctx context.Context, groupID, artifactID string) (uint32, map[string]any, error) {
 	url := fmt.Sprintf("/apis/registry/v3/groups/%s/artifacts/%s/versions/branch=latest", groupID, artifactID)
 	resp, err := c.makeRequest(ctx, "GET", url, nil)
 	if err != nil {
@@ -357,11 +357,11 @@ func (c *ApicurioClient) SearchArtifacts(ctx context.Context, name, artifactType
 func (c *ApicurioClient) RegisterSchema(ctx context.Context, group, artifactName, schemaContent string) (uint32, error) {
 	url := fmt.Sprintf("/apis/registry/v3/groups/%s/artifacts", group)
 
-	artifactData := map[string]interface{}{
+	artifactData := map[string]any{
 		"artifactId":   artifactName,
 		"artifactType": "AVRO",
-		"firstVersion": map[string]interface{}{
-			"content": map[string]interface{}{
+		"firstVersion": map[string]any{
+			"content": map[string]any{ //nolint:goconst
 				"content":     schemaContent,
 				"contentType": "application/json",
 			},
@@ -404,8 +404,8 @@ func (c *ApicurioClient) RegisterSchema(ctx context.Context, group, artifactName
 func (c *ApicurioClient) RegisterSchemaVersion(ctx context.Context, groupID, artifactID, schemaContent string) (uint32, error) {
 	url := fmt.Sprintf("/apis/registry/v3/groups/%s/artifacts/%s/versions", groupID, artifactID)
 
-	versionData := map[string]interface{}{
-		"content": map[string]interface{}{
+	versionData := map[string]any{
+		"content": map[string]any{
 			"content":     schemaContent,
 			"contentType": "application/json",
 		},
@@ -585,8 +585,8 @@ func (c *ApicurioClient) ClearCache() {
 }
 
 // GetCacheStats returns cache statistics.
-func (c *ApicurioClient) GetCacheStats() map[string]interface{} {
-	stats := make(map[string]interface{})
+func (c *ApicurioClient) GetCacheStats() map[string]any {
+	stats := make(map[string]any)
 
 	if c.schemaCache != nil {
 		stats["schema_cache_size"] = c.schemaCache.Len()

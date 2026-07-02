@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const defaultBaseURL = "http://localhost:8080"
+
 // ApicurioConfig represents configuration for Apicurio Schema Registry client.
 type ApicurioConfig struct {
 	// BaseURL is the base URL of the Apicurio Registry instance
@@ -42,7 +44,7 @@ type ApicurioConfig struct {
 // NewApicurioConfig creates a new ApicurioConfig with default values.
 func NewApicurioConfig() *ApicurioConfig {
 	return &ApicurioConfig{
-		BaseURL:               "http://localhost:8080",
+		BaseURL:               defaultBaseURL,
 		Timeout:               30 * time.Second,
 		MaxRetries:            3,
 		SchemaCacheSize:       1000,

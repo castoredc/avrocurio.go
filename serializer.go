@@ -19,13 +19,13 @@ func NewAvroSerializer(client *ApicurioClient) *AvroSerializer {
 }
 
 // SerializeWithSchemaID serializes an object using an explicit schema ID.
-func (s *AvroSerializer) SerializeWithSchemaID(ctx context.Context, obj interface{}, schemaID uint32) ([]byte, error) {
+func (s *AvroSerializer) SerializeWithSchemaID(ctx context.Context, obj any, schemaID uint32) ([]byte, error) {
 	return s.serializeWithSchemaID(ctx, obj, schemaID)
 }
 
 // Serialize serializes an object with automatic schema lookup.
 // Attempts to automatically find a matching schema in the registry.
-func (s *AvroSerializer) Serialize(ctx context.Context, obj interface{}, schema avro.Schema) ([]byte, error) {
+func (s *AvroSerializer) Serialize(ctx context.Context, obj any, schema avro.Schema) ([]byte, error) {
 	// Automatic schema lookup
 	schemaContent := schema.String()
 	groupID, artifactID, err := s.client.FindArtifactByContent(ctx, schemaContent, nil)
@@ -47,7 +47,7 @@ func (s *AvroSerializer) Serialize(ctx context.Context, obj interface{}, schema 
 }
 
 // serializeWithSchemaID performs core serialization logic using a specific schema ID.
-func (s *AvroSerializer) serializeWithSchemaID(ctx context.Context, obj interface{}, schemaID uint32) ([]byte, error) {
+func (s *AvroSerializer) serializeWithSchemaID(ctx context.Context, obj any, schemaID uint32) ([]byte, error) {
 	schemaMap, err := s.client.GetSchemaByGlobalID(ctx, schemaID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get schema by global ID: %w", err)
@@ -77,7 +77,7 @@ func (s *AvroSerializer) serializeWithSchemaID(ctx context.Context, obj interfac
 
 // Deserialize deserializes a message with Confluent wire format framing into target.
 // Use DeserializeToInterface for raw deserialization.
-func (s *AvroSerializer) Deserialize(ctx context.Context, message []byte, target interface{}) error {
+func (s *AvroSerializer) Deserialize(ctx context.Context, message []byte, target any) error {
 	wireFormat := &ConfluentWireFormat{}
 	schemaID, avroPayload, err := wireFormat.Decode(message)
 	if err != nil {
@@ -100,9 +100,9 @@ func (s *AvroSerializer) Deserialize(ctx context.Context, message []byte, target
 		return fmt.Errorf("failed to parse Avro writer schema: %w", err)
 	}
 
-	// If target is nil, deserialize to interface{}
+	// If target is nil, deserialize to any
 	if target == nil {
-		var result interface{}
+		var result any
 		err = avro.Unmarshal(writerSchema, avroPayload, &result)
 		if err != nil {
 			return fmt.Errorf("failed to deserialize message: %w", err)
@@ -121,8 +121,8 @@ func (s *AvroSerializer) Deserialize(ctx context.Context, message []byte, target
 	return nil
 }
 
-// DeserializeToInterface deserializes a message to a raw interface{}.
-func (s *AvroSerializer) DeserializeToInterface(ctx context.Context, message []byte) (interface{}, error) {
+// DeserializeToInterface deserializes a message to a raw any.
+func (s *AvroSerializer) DeserializeToInterface(ctx context.Context, message []byte) (any, error) {
 	wireFormat := &ConfluentWireFormat{}
 	schemaID, avroPayload, err := wireFormat.Decode(message)
 	if err != nil {
@@ -145,7 +145,7 @@ func (s *AvroSerializer) DeserializeToInterface(ctx context.Context, message []b
 		return nil, fmt.Errorf("failed to parse Avro writer schema: %w", err)
 	}
 
-	var result interface{}
+	var result any
 	err = avro.Unmarshal(writerSchema, avroPayload, &result)
 	if err != nil {
 		return nil, fmt.Errorf("failed to deserialize message: %w", err)

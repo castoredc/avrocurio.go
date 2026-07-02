@@ -6,11 +6,16 @@ import (
 	"time"
 )
 
+const (
+	testUsername = "user"
+	testPassword = "pass"
+)
+
 func TestNewApicurioConfig(t *testing.T) {
 	config := NewApicurioConfig()
 
 	// Test default values
-	if config.BaseURL != "http://localhost:8080" {
+	if config.BaseURL != defaultBaseURL {
 		t.Errorf("Default BaseURL = %v, want http://localhost:8080", config.BaseURL)
 	}
 
@@ -74,8 +79,8 @@ func TestApicurioConfig_WithMethods(t *testing.T) {
 	}
 
 	// Test WithBasicAuth
-	config = config.WithBasicAuth("user", "pass")
-	if config.Username != "user" || config.Password != "pass" {
+	config = config.WithBasicAuth(testUsername, testPassword)
+	if config.Username != testUsername || config.Password != testPassword {
 		t.Errorf("WithBasicAuth failed: got %v:%v", config.Username, config.Password)
 	}
 
@@ -129,19 +134,19 @@ func TestApicurioConfig_HasBasicAuth(t *testing.T) {
 	}{
 		{
 			name:     "both username and password",
-			username: "user",
-			password: "pass",
+			username: testUsername,
+			password: testPassword,
 			expected: true,
 		},
 		{
 			name:     "empty username",
 			username: "",
-			password: "pass",
+			password: testPassword,
 			expected: false,
 		},
 		{
 			name:     "empty password",
-			username: "user",
+			username: testUsername,
 			password: "",
 			expected: false,
 		},
@@ -282,11 +287,11 @@ func TestApicurioConfig_String(t *testing.T) {
 		{
 			name:       "default config",
 			configFunc: func(c *ApicurioConfig) *ApicurioConfig { return c },
-			contains:   []string{"ApicurioConfig", "http://localhost:8080", "30s", "MaxRetries: 3", "Auth: none"},
+			contains:   []string{"ApicurioConfig", defaultBaseURL, "30s", "MaxRetries: 3", "Auth: none"},
 		},
 		{
 			name:        "config with basic auth",
-			configFunc:  func(c *ApicurioConfig) *ApicurioConfig { return c.WithBasicAuth("user", "pass") },
+			configFunc:  func(c *ApicurioConfig) *ApicurioConfig { return c.WithBasicAuth(testUsername, testPassword) },
 			contains:    []string{"ApicurioConfig", "Auth: basic"},
 			notContains: []string{"Auth: none"},
 		},
