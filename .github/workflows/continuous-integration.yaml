@@ -37,7 +37,7 @@ jobs:
         go-version: ["1.24.x", "1.25.x"]
     services:
       apicurio:
-        image: apicurio/apicurio-registry:latest-release@sha256:9464d0de6394e543efeea829aee07bff52c5cccee7bba362cf96e02de48da453
+        image: apicurio/apicurio-registry:latest-release@sha256:c9cae4c90ce46538abf673c68eb591345f23bcc6c2aa6bfd47189adcf609d8f1
         ports:
           - 8080:8080
         options: >-
