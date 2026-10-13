@@ -34,6 +34,10 @@ linters:
     - wsl_v5
 
   settings:
+    exhaustruct_v5:
+      ignore-patterns:
+        # Zero-value fields on http.Client select the documented defaults.
+        - 'net/http\.Client'
     varnamelen:
       max-distance: 15
       ignore-names:

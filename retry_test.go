@@ -149,7 +149,9 @@ func TestRetryWithJitterConfiguration(t *testing.T) {
 }
 
 func TestShouldRetryStatusCode(t *testing.T) {
-	client := &ApicurioClient{}
+	client, err := NewApicurioClient(NewApicurioConfig())
+	require.NoError(t, err)
+	defer client.Close()
 
 	tests := []struct {
 		statusCode  int

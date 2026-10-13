@@ -69,26 +69,30 @@ func NewApicurioClient(config *ApicurioConfig) (*ApicurioClient, error) {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
 
+	var schemaCache *ttlcache.Cache[uint32, map[string]any]
+	if config.SchemaCacheSize > 0 {
+		schemaCache = ttlcache.New(
+			ttlcache.WithCapacity[uint32, map[string]any](uint64(config.SchemaCacheSize)),
+		)
+		go schemaCache.Start()
+	}
+
+	var failedCache *ttlcache.Cache[uint32, *CachedError]
+	if config.FailedLookupCacheSize > 0 {
+		failedCache = ttlcache.New(
+			ttlcache.WithCapacity[uint32, *CachedError](uint64(config.FailedLookupCacheSize)),
+			ttlcache.WithTTL[uint32, *CachedError](config.FailedLookupCacheTTL),
+		)
+		go failedCache.Start()
+	}
+
 	client := &ApicurioClient{
 		config: config,
 		httpClient: &http.Client{
 			Timeout: config.Timeout,
 		},
-	}
-
-	if config.SchemaCacheSize > 0 {
-		client.schemaCache = ttlcache.New(
-			ttlcache.WithCapacity[uint32, map[string]any](uint64(config.SchemaCacheSize)),
-		)
-		go client.schemaCache.Start()
-	}
-
-	if config.FailedLookupCacheSize > 0 {
-		client.failedCache = ttlcache.New(
-			ttlcache.WithCapacity[uint32, *CachedError](uint64(config.FailedLookupCacheSize)),
-			ttlcache.WithTTL[uint32, *CachedError](config.FailedLookupCacheTTL),
-		)
-		go client.failedCache.Start()
+		schemaCache: schemaCache,
+		failedCache: failedCache,
 	}
 
 	return client, nil
