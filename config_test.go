@@ -180,6 +180,7 @@ func TestApicurioConfig_Validate(t *testing.T) {
 			name:        "valid default config",
 			configFunc:  func(c *ApicurioConfig) *ApicurioConfig { return c },
 			expectedErr: false,
+			errContains: "",
 		},
 		{
 			name:        "empty base URL",
@@ -285,9 +286,10 @@ func TestApicurioConfig_String(t *testing.T) {
 		notContains []string
 	}{
 		{
-			name:       "default config",
-			configFunc: func(c *ApicurioConfig) *ApicurioConfig { return c },
-			contains:   []string{"ApicurioConfig", defaultBaseURL, "30s", "MaxRetries: 3", "Auth: none"},
+			name:        "default config",
+			configFunc:  func(c *ApicurioConfig) *ApicurioConfig { return c },
+			contains:    []string{"ApicurioConfig", defaultBaseURL, "30s", "MaxRetries: 3", "Auth: none"},
+			notContains: nil,
 		},
 		{
 			name:        "config with basic auth",
@@ -302,7 +304,8 @@ func TestApicurioConfig_String(t *testing.T) {
 					WithTimeout(45 * time.Second).
 					WithMaxRetries(2)
 			},
-			contains: []string{"https://custom.com", "45s", "MaxRetries: 2"},
+			contains:    []string{"https://custom.com", "45s", "MaxRetries: 2"},
+			notContains: nil,
 		},
 	}
 

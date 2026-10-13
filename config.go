@@ -45,6 +45,8 @@ type ApicurioConfig struct {
 func NewApicurioConfig() *ApicurioConfig {
 	return &ApicurioConfig{
 		BaseURL:               defaultBaseURL,
+		Username:              "",
+		Password:              "",
 		Timeout:               30 * time.Second,
 		MaxRetries:            3,
 		SchemaCacheSize:       1000,
