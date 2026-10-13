@@ -5,7 +5,7 @@ go 1.24.6
 require (
 	github.com/google/uuid v1.6.0
 	github.com/hamba/avro/v2 v2.30.0
-	github.com/jellydator/ttlcache/v3 v3.4.0
+	github.com/jellydator/ttlcache/v3 v3.4.1
 	github.com/sethvargo/go-retry v0.3.0
 	github.com/stretchr/testify v1.11.1
 )
